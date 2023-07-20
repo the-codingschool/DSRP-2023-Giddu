@@ -6,6 +6,7 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(janitor)
+library(rjson)
 
 # Research Checkpoint 1: Cleaning the Data Set ####
 
@@ -24,55 +25,40 @@ View(VidView)
 
 # New Variables for Categorical_ID
 new_data <- mutate(renamed_data, category_id = case_when(
-  category_id == 1 ~ "name",
-  category_id == 2 ~ "name",
-  category_id == 3 ~ "name",
-  category_id == 4 ~ "name",
-  category_id == 5 ~ "name",
-  category_id == 6 ~ "name",
-  category_id == 7 ~ "name",
-  category_id == 8 ~ "name",
-  category_id == 9 ~ "name",
-  category_id == 10 ~ "name",
-  category_id == 11 ~ "name",
-  category_id == 12 ~ "name",
-  category_id == 13 ~ "name",
-  category_id == 14 ~ "name",
-  category_id == 15 ~ "name",
+  category_id == 1 ~ "Film & Animation",
+  category_id == 2 ~ "Autos & Vehicles",
+  category_id == 10 ~ "Music",
+  category_id == 15 ~ "Pets & Animals",
   category_id == 16 ~ "name",
-  category_id == 17 ~ "name",
-  category_id == 18 ~ "name",
-  category_id == 19 ~ "name",
-  category_id == 20 ~ "name",
-  category_id == 21 ~ "name",
-  category_id == 22 ~ "name",
-  category_id == 23 ~ "name",
-  category_id == 24 ~ "name",
-  category_id == 25 ~ "name",
-  category_id == 26 ~ "name",
-  category_id == 27 ~ "name",
-  category_id == 28 ~ "name",
-  category_id == 29 ~ "name",
-  category_id == 30 ~ "name",
-  category_id == 31 ~ "name",
-  category_id == 32 ~ "name",
-  category_id == 33 ~ "name",
-  category_id == 34 ~ "name",
-  category_id == 35 ~ "name",
-  category_id == 36 ~ "name",
-  category_id == 37 ~ "name",
-  category_id == 38 ~ "name",
-  category_id == 39 ~ "name",
-  category_id == 40 ~ "name",
-  category_id == 41 ~ "name",
-  category_id == 42 ~ "name",
-  category_id == 43 ~ "name"))
-
-
-
-dude <- mutate(iris, Petal.Width = case_when(
-  Petal.Width == 0.2 ~ "172"))
-View(dude)
+  category_id == 17 ~ "Sports",
+  category_id == 18 ~ "Short Movies",
+  category_id == 19 ~ "Travel & Events",
+  category_id == 20 ~ "Gaming",
+  category_id == 21 ~ "Videoblogging",
+  category_id == 22 ~ "People & Blogs",
+  category_id == 23 ~ "Comedy",
+  category_id == 24 ~ "Entertainment",
+  category_id == 25 ~ "News & Politics",
+  category_id == 26 ~ "Howto & Style",
+  category_id == 27 ~ "Education",
+  category_id == 28 ~ "Science & Technology",
+  category_id == 29 ~ "Nonprofits & Activism",
+  category_id == 30 ~ "Movies",
+  category_id == 31 ~ "Anime/Animation",
+  category_id == 32 ~ "Action/Adventure",
+  category_id == 33 ~ "Classics",
+  category_id == 34 ~ "Comedy",
+  category_id == 35 ~ "Documentary",
+  category_id == 36 ~ "Drama",
+  category_id == 37 ~ "Family",
+  category_id == 38 ~ "Foreign",
+  category_id == 39 ~ "Horror",
+  category_id == 40 ~ "Sci-Fi/Fantasy",
+  category_id == 41 ~ "Thriller",
+  category_id == 42 ~ "Shorts",
+  category_id == 43 ~ "Shows",
+  category_id == 44 ~ "Trailers"))
+View(new_data)
   
   
 # Research Checkpoint 2: Analyze Variables of Data & Create Testable Research Question ####
