@@ -8,6 +8,7 @@ library(tidyr)
 library(janitor)
 library(rjson)
 
+
 # Research Checkpoint 1: Cleaning the Data Set ####
 
 # Renaming Columns
@@ -20,10 +21,10 @@ View(renamed_data)
 # Videos ranked by Views
 VidView <- renamed_data |>
   arrange(views) |>
-  select(title, channel, likes, dislikes, comment_count)
+  select(title, channel, likes, dislikes, comment_count, views)
 View(VidView)
 
-# New Variables for Categorical_ID
+# New Variables for Categorical_ID ####
 new_data <- mutate(renamed_data, category_id = case_when(
   category_id == 1 ~ "Film & Animation",
   category_id == 2 ~ "Autos & Vehicles",
@@ -60,7 +61,7 @@ new_data <- mutate(renamed_data, category_id = case_when(
   category_id == 44 ~ "Trailers"))
 View(new_data)
   
-  
+
 # Research Checkpoint 2: Analyze Variables of Data & Create Testable Research Question ####
 # Categorical Variables: videos_id, title, channel, tags, comment/ratings/videos_disabled/removed, description
 # Numeric Variables: views, likes, dislikes, comment_count
@@ -76,26 +77,37 @@ View(new_data)
 
 # Research Questions
   # How do the Title of the Video and the Time it was Published influences the View Counts?
+  # How do the Title of the Videos influences the View Counts of it?
+  # How does the Time it was Published of the Videos affect the View Counts of it?
+  # How does the Category of the Videos affect the View Counts of it? (Probably the Best)
 
-## Plots ##
+
+## Plots ####
 ggplot()
 
 # Histogram Plot for Views (1 Numeric Variable)
 ggplot(data = renamed_data, aes(x = views)) +
   geom_histogram()
 
-# Barplots between Views and Category ID (1 Numeric Variable & 1 Categorical Variable) 
-ggplot(data = renamed_data, aes(x = views, y = likes, fill = category_id)) +
-  geom_bar(stat = "summary" ,
+# Research Question Plot?
+# Bar Plot between Views and Category ID (1 Categorical Variable & 1 Numeric Variable) 
+ggplot(data = renamed_data, aes(x = title, y = views)) +
+  geom_bar(stat = "summary",
+              fun = "mean")
+
+## BEST BARPLOT ##
+ggplot(data = renamed_data, aes(x = category_id, y = views)) +
+  geom_bar(stat = "summary",
            fun = "mean")
 
+# Scatter Plot for Most Common between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
+ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
+  geom_point()
 
-
-
-
-
-
-
+# Line Plot between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
+ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
+  geom_line(stat = "summary",
+            fun = "mean")
 
 
 
