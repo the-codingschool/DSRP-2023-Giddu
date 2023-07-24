@@ -67,7 +67,10 @@ new_data <- mutate(renamed_data, category_id = case_when(
   category_id == 43 ~ "Shows",
   category_id == 44 ~ "Trailers"))
 View(new_data)
-  
+
+# Separate publish_time into 2 Column: Month_Publish and Time_Publish
+
+
 
 # Research Checkpoint 2: Analyze Variables of Data & Create Testable Research Question ####
 
@@ -125,36 +128,83 @@ ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
 # Conduct Statistical Analysis
 # Machine Learning Model
 
+# Step 1 and 2:
+VidOnlDat <- select(new_data, -c(video_id, trending_date, publish_time, tags, thumbnail_link:description))
+View(VidOnlDat)
+
+str(VidOnlDat)
+VidOnlDat_nochr <- mutate(VidOnlDat, title = as.integer(as.factor(title)),
+                          channel = as.integer(as.factor(channel)),
+                          category_id = as.integer(as.factor(category_id)))
+VidOnlDat_nochr
+str(VidOnlDat_nochr)
+
+# Step 3:
+VidOnlDat_Cors <- VidOnlDat_nochr |>
+  cor() |>
+  melt() |>
+  as.data.frame()
+
+VidOnlDat_Cors
+View(VidOnlDat_Cors)
+
+ggplot(VidOnlDat_Cors, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "darkblue", high = "white", mid = "darkgreen",
+                       midpoint = 0)
+
+# Step 4 and 5:
+set.seed(72423)
+
+# Regression Data Split (Predict Numeric Variables) (Predict View Counts)
+VidOnlDat_split <- initial_split(VidOnlDat_nochr, prop = .75) # Use 75% of data for Training
+VidOnlDat_train <- training(VidOnlDat_split)
+VidOnlDat_test <- testing(VidOnlDat_split)
 
 
+# Step 6 and 7:
+
+#Linear Model
+VidOnlDat_lm_fit <- linear_reg() |>
+  set_engine("lm") |>
+  set_mode("regression") |>
+  fit(views ~ .,
+      data = VidOnlDat_train)
+
+VidOnlDat_lm_fit
+VidOnlDat_lm_fit$fit
+summary(VidOnlDat_lm_fit$fit)
 
 
+# Boosted Decision Trees
+VidOnlDat_boost_reg_fit <- boost_tree() |>
+  set_engine("xgboost") |>
+  set_mode("regression") |>
+  fit(views ~ ., data = VidOnlDat_train)
+
+VidOnlDat_boost_reg_fit
+VidOnlDat_boost_reg_fit$fit
+summary(VidOnlDat_boost_reg_fit$fit)
+VidOnlDat_boost_reg_fit$fit$evaluation_log
 
 
+# Step 8:
+VidOnlDat_reg_results <- VidOnlDat_test
+
+#Linear Regression
+VidOnlDat_reg_results$lm_pred <- predict(VidOnlDat_lm_fit, VidOnlDat_test)$.pred
+
+# Error for LR
+yardstick::mae(VidOnlDat_reg_results, views, lm_pred)
+yardstick::rmse(VidOnlDat_reg_results, views, lm_pred)
 
 
+# Boosted Tree Regression
+VidOnlDat_reg_results$boost_pred <- predict(VidOnlDat_boost_reg_fit, VidOnlDat_test)$.pred
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Error for BT
+yardstick::mae(VidOnlDat_reg_results, views, boost_pred)
+yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
 
 
 
