@@ -1,12 +1,19 @@
 data <- readRDS("data/USvideos.RDS")
 View(data) # trending_date = year/day/month
 
-# Libraries
+# Libraries ####
 library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(janitor)
 library(rjson)
+library(lubridate)
+library(parsnip)
+library(rsample)
+library(yardstick)
+library(reshape2)
+library(MLmetrics)
+library(Metrics)
 
 
 # Research Checkpoint 1: Cleaning the Data Set ####
@@ -63,6 +70,7 @@ View(new_data)
   
 
 # Research Checkpoint 2: Analyze Variables of Data & Create Testable Research Question ####
+
 # Categorical Variables: videos_id, title, channel, tags, comment/ratings/videos_disabled/removed, description
 # Numeric Variables: views, likes, dislikes, comment_count
 # Both: trending_date, category_id?, publish_time, 
@@ -110,31 +118,12 @@ ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
             fun = "mean")
 
 
+# Research Checkpoint: 3 ####
+# Formatting Data
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Conduct Statistical Analysis
+# Machine Learning Model
 
 
 
