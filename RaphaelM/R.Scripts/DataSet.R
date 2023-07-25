@@ -1,0 +1,275 @@
+data <- readRDS("data/USvideos.RDS")
+View(data) # trending_date = year/day/month
+
+# Libraries ####
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(janitor)
+library(rjson)
+library(lubridate)
+library(parsnip)
+library(rsample)
+library(yardstick)
+library(reshape2)
+library(MLmetrics)
+library(Metrics)
+
+
+# Research Checkpoint 1: Cleaning the Data Set ####
+
+# Renaming Columns
+renamed_data <- rename(data,
+                   channel = channel_title,
+                   videos_removed = video_error_or_removed,
+                   genre = category_id,
+                   comments = comment_count)
+View(renamed_data)
+
+
+
+# Separate publish_time into 2 Column: Month_Publish and Time_Publish
+mutate(renamed_data,
+       month_published = publish_time,
+       time_published = publish_time)
+
+
+
+# Videos ranked by Views
+VidView <- renamed_data |>
+  arrange(views) |>
+  select(title, channel, likes, dislikes, comments, views)
+View(VidView)
+
+# New Variables for Categorical_ID ####
+new_data <- mutate(renamed_data, genre = case_when(
+  genre == 1 ~ "Film & Animation",
+  genre == 2 ~ "Autos & Vehicles",
+  genre == 10 ~ "Music",
+  genre == 15 ~ "Pets & Animals",
+  genre == 16 ~ "name",
+  genre == 17 ~ "Sports",
+  genre == 18 ~ "Short Movies",
+  genre == 19 ~ "Travel & Events",
+  genre == 20 ~ "Gaming",
+  genre == 21 ~ "Videoblogging",
+  genre == 22 ~ "People & Blogs",
+  genre == 23 ~ "Comedy",
+  genre == 24 ~ "Entertainment",
+  genre == 25 ~ "News & Politics",
+  genre == 26 ~ "Howto & Style",
+  genre == 27 ~ "Education",
+  genre == 28 ~ "Science & Technology",
+  genre == 29 ~ "Nonprofits & Activism",
+  genre == 30 ~ "Movies",
+  genre == 31 ~ "Anime/Animation",
+  genre == 32 ~ "Action/Adventure",
+  genre == 33 ~ "Classics",
+  genre == 34 ~ "Comedy",
+  genre == 35 ~ "Documentary",
+  genre == 36 ~ "Drama",
+  genre == 37 ~ "Family",
+  genre == 38 ~ "Foreign",
+  genre == 39 ~ "Horror",
+  genre == 40 ~ "Sci-Fi/Fantasy",
+  genre == 41 ~ "Thriller",
+  genre == 42 ~ "Shorts",
+  genre == 43 ~ "Shows",
+  genre == 44 ~ "Trailers"))
+View(new_data)
+
+
+
+
+# Research Checkpoint 2: Analyze Variables of Data & Create Testable Research Question ####
+
+# Categorical Variables: videos_id, title, channel, tags, comment/ratings/videos_disabled/removed, description
+# Numeric Variables: views, likes, dislikes, comment_count
+# Both: trending_date, category_id?, publish_time, 
+
+## Notes and Questions ##
+# What do the Numbers in the category_id Variable mean?
+  # No information about Category ID Numbers
+# How is the trending_date's are Organized?
+  # Is it from Year / Day / Month?
+# How is the publish_time Organized?
+  # What do the T represents?
+
+# Research Questions
+  # How do the Title of the Video and the Time it was Published influences the View Counts?
+  # How do the Title of the Videos influences the View Counts of it?
+  # How does the Time it was Published of the Videos affect the View Counts of it?
+  # How does the Category of the Videos affect the View Counts of it? (Probably the Best)
+
+
+## Plots ####
+ggplot()
+
+# Histogram Plot for Views (1 Numeric Variable)
+ggplot(data = renamed_data, aes(x = views)) +
+  geom_histogram()
+
+# Research Question Plot?
+# Bar Plot between Views and Category ID (1 Categorical Variable & 1 Numeric Variable) 
+ggplot(data = renamed_data, aes(x = title, y = views)) +
+  geom_bar(stat = "summary",
+              fun = "mean")
+
+## BEST BARPLOT ##
+ggplot(data = renamed_data, aes(x = genre, y = views)) +
+  geom_bar(stat = "summary", fun = "mean") +
+  labs(x = "Genre", y = "Views",
+       title = "Most Viewed Genre of Youtube's Genre")
+
+
+# Scatter Plot for Most Common between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
+ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
+  geom_point()
+
+# Line Plot between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
+ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
+  geom_line(stat = "summary",
+            fun = "mean")
+
+
+
+
+# Research Checkpoint: 3 ####
+# Formatting Data
+
+
+# Conduct Statistical Analysis
+# Machine Learning Model
+
+# Step 1 and 2:
+VidOnlDat <- select(new_data, -c(video_id, trending_date, publish_time, tags, thumbnail_link:description))
+View(VidOnlDat)
+
+str(VidOnlDat)
+VidOnlDat_nochr <- mutate(VidOnlDat, title = as.integer(as.factor(title)),
+                          channel = as.integer(as.factor(channel)),
+                          genre = as.integer(as.factor(genre)))
+VidOnlDat_nochr
+str(VidOnlDat_nochr)
+
+# Step 3:
+VidOnlDat_Cors <- VidOnlDat_nochr |>
+  cor() |>
+  melt() |>
+  as.data.frame()
+
+VidOnlDat_Cors
+View(VidOnlDat_Cors)
+
+ggplot(VidOnlDat_Cors, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "darkblue", high = "white", mid = "darkgreen",
+                       midpoint = 0)
+
+# Step 4 and 5:
+set.seed(72423)
+
+# Regression Data Split (Predict Numeric Variables) (Predict View Counts)
+VidOnlDat_split <- initial_split(VidOnlDat_nochr, prop = .75) # Use 75% of data for Training
+VidOnlDat_train <- training(VidOnlDat_split)
+VidOnlDat_test <- testing(VidOnlDat_split)
+
+
+# Step 6 and 7:
+
+#Linear Model
+VidOnlDat_lm_fit <- linear_reg() |>
+  set_engine("lm") |>
+  set_mode("regression") |>
+  fit(views ~ .,
+      data = VidOnlDat_train)
+
+VidOnlDat_lm_fit
+VidOnlDat_lm_fit$fit
+summary(VidOnlDat_lm_fit$fit)
+
+
+# Boosted Decision Trees
+VidOnlDat_boost_reg_fit <- boost_tree() |>
+  set_engine("xgboost") |>
+  set_mode("regression") |>
+  fit(views ~ ., data = VidOnlDat_train)
+
+VidOnlDat_boost_reg_fit
+VidOnlDat_boost_reg_fit$fit
+summary(VidOnlDat_boost_reg_fit$fit)
+VidOnlDat_boost_reg_fit$fit$evaluation_log
+
+
+# Step 8:
+VidOnlDat_reg_results <- VidOnlDat_test
+
+#Linear Regression
+VidOnlDat_reg_results$lm_pred <- predict(VidOnlDat_lm_fit, VidOnlDat_test)$.pred
+
+# Error for LR
+yardstick::mae(VidOnlDat_reg_results, views, lm_pred)
+yardstick::rmse(VidOnlDat_reg_results, views, lm_pred)
+
+
+# Boosted Tree Regression
+VidOnlDat_reg_results$boost_pred <- predict(VidOnlDat_boost_reg_fit, VidOnlDat_test)$.pred
+
+# Error for BT
+yardstick::mae(VidOnlDat_reg_results, views, boost_pred)
+yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
