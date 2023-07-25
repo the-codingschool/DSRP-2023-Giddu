@@ -1,4 +1,5 @@
 data <- readRDS("data/USvideos.RDS")
+data2 <- 
 View(data) # trending_date = year/day/month
 
 # Libraries ####
@@ -29,9 +30,10 @@ View(renamed_data)
 
 
 # Separate publish_time into 2 Column: Month_Publish and Time_Publish
-mutate(renamed_data,
-       month_published = publish_time,
-       time_published = publish_time)
+newvar_data <- mutate(renamed_data,
+       month_publish = month(publish_time),
+       time_published_hrs = hour(publish_time))
+View(newvar_data)
 
 
 
@@ -42,7 +44,8 @@ VidView <- renamed_data |>
 View(VidView)
 
 # New Variables for Categorical_ID ####
-new_data <- mutate(renamed_data, genre = case_when(
+# First Version
+new_data <- mutate(newvar_data, genre = case_when(
   genre == 1 ~ "Film & Animation",
   genre == 2 ~ "Autos & Vehicles",
   genre == 10 ~ "Music",
@@ -77,6 +80,11 @@ new_data <- mutate(renamed_data, genre = case_when(
   genre == 43 ~ "Shows",
   genre == 44 ~ "Trailers"))
 View(new_data)
+
+# Second Version
+
+
+
 
 
 
