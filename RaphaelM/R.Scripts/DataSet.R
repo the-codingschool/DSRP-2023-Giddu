@@ -1,6 +1,7 @@
 data <- readRDS("data/USvideos.RDS")
-data2 <- 
+data2 <- fromJSON(file="data/US_category_id.json")
 View(data) # trending_date = year/day/month
+View(data2)
 
 # Libraries ####
 library(dplyr)
@@ -123,11 +124,16 @@ ggplot(data = renamed_data, aes(x = title, y = views)) +
   geom_bar(stat = "summary",
               fun = "mean")
 
+
+
+
 ## BEST BARPLOT ##
 ggplot(data = renamed_data, aes(x = genre, y = views)) +
   geom_bar(stat = "summary", fun = "mean") +
   labs(x = "Genre", y = "Views",
        title = "Most Viewed Genre of Youtube's Genre")
+
+
 
 
 # Scatter Plot for Most Common between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
@@ -150,7 +156,7 @@ ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
 # Machine Learning Model
 
 # Step 1 and 2:
-VidOnlDat <- select(new_data, -c(video_id, trending_date, publish_time, tags, thumbnail_link:description))
+VidOnlDat <- select(new_data, -c(video_id, trending_date, publish_time, tags, thumbnail_link:time_published_hrs))
 View(VidOnlDat)
 
 str(VidOnlDat)
@@ -173,6 +179,8 @@ ggplot(VidOnlDat_Cors, aes(x = Var1, y = Var2, fill = value)) +
   geom_tile() +
   scale_fill_gradient2(low = "darkblue", high = "white", mid = "darkgreen",
                        midpoint = 0)
+# High Correlation = Views to Likes
+
 
 # Step 4 and 5:
 set.seed(72423)
