@@ -21,54 +21,63 @@ library(Metrics)
 # Renaming Columns
 renamed_data <- rename(data,
                    channel = channel_title,
-                   videos_removed = video_error_or_removed)
+                   videos_removed = video_error_or_removed,
+                   genre = category_id,
+                   comments = comment_count)
 View(renamed_data)
+
+
+
+# Separate publish_time into 2 Column: Month_Publish and Time_Publish
+mutate(renamed_data,
+       month_published = publish_time,
+       time_published = publish_time)
+
 
 
 # Videos ranked by Views
 VidView <- renamed_data |>
   arrange(views) |>
-  select(title, channel, likes, dislikes, comment_count, views)
+  select(title, channel, likes, dislikes, comments, views)
 View(VidView)
 
 # New Variables for Categorical_ID ####
-new_data <- mutate(renamed_data, category_id = case_when(
-  category_id == 1 ~ "Film & Animation",
-  category_id == 2 ~ "Autos & Vehicles",
-  category_id == 10 ~ "Music",
-  category_id == 15 ~ "Pets & Animals",
-  category_id == 16 ~ "name",
-  category_id == 17 ~ "Sports",
-  category_id == 18 ~ "Short Movies",
-  category_id == 19 ~ "Travel & Events",
-  category_id == 20 ~ "Gaming",
-  category_id == 21 ~ "Videoblogging",
-  category_id == 22 ~ "People & Blogs",
-  category_id == 23 ~ "Comedy",
-  category_id == 24 ~ "Entertainment",
-  category_id == 25 ~ "News & Politics",
-  category_id == 26 ~ "Howto & Style",
-  category_id == 27 ~ "Education",
-  category_id == 28 ~ "Science & Technology",
-  category_id == 29 ~ "Nonprofits & Activism",
-  category_id == 30 ~ "Movies",
-  category_id == 31 ~ "Anime/Animation",
-  category_id == 32 ~ "Action/Adventure",
-  category_id == 33 ~ "Classics",
-  category_id == 34 ~ "Comedy",
-  category_id == 35 ~ "Documentary",
-  category_id == 36 ~ "Drama",
-  category_id == 37 ~ "Family",
-  category_id == 38 ~ "Foreign",
-  category_id == 39 ~ "Horror",
-  category_id == 40 ~ "Sci-Fi/Fantasy",
-  category_id == 41 ~ "Thriller",
-  category_id == 42 ~ "Shorts",
-  category_id == 43 ~ "Shows",
-  category_id == 44 ~ "Trailers"))
+new_data <- mutate(renamed_data, genre = case_when(
+  genre == 1 ~ "Film & Animation",
+  genre == 2 ~ "Autos & Vehicles",
+  genre == 10 ~ "Music",
+  genre == 15 ~ "Pets & Animals",
+  genre == 16 ~ "name",
+  genre == 17 ~ "Sports",
+  genre == 18 ~ "Short Movies",
+  genre == 19 ~ "Travel & Events",
+  genre == 20 ~ "Gaming",
+  genre == 21 ~ "Videoblogging",
+  genre == 22 ~ "People & Blogs",
+  genre == 23 ~ "Comedy",
+  genre == 24 ~ "Entertainment",
+  genre == 25 ~ "News & Politics",
+  genre == 26 ~ "Howto & Style",
+  genre == 27 ~ "Education",
+  genre == 28 ~ "Science & Technology",
+  genre == 29 ~ "Nonprofits & Activism",
+  genre == 30 ~ "Movies",
+  genre == 31 ~ "Anime/Animation",
+  genre == 32 ~ "Action/Adventure",
+  genre == 33 ~ "Classics",
+  genre == 34 ~ "Comedy",
+  genre == 35 ~ "Documentary",
+  genre == 36 ~ "Drama",
+  genre == 37 ~ "Family",
+  genre == 38 ~ "Foreign",
+  genre == 39 ~ "Horror",
+  genre == 40 ~ "Sci-Fi/Fantasy",
+  genre == 41 ~ "Thriller",
+  genre == 42 ~ "Shorts",
+  genre == 43 ~ "Shows",
+  genre == 44 ~ "Trailers"))
 View(new_data)
 
-# Separate publish_time into 2 Column: Month_Publish and Time_Publish
 
 
 
@@ -107,9 +116,11 @@ ggplot(data = renamed_data, aes(x = title, y = views)) +
               fun = "mean")
 
 ## BEST BARPLOT ##
-ggplot(data = renamed_data, aes(x = category_id, y = views)) +
-  geom_bar(stat = "summary",
-           fun = "mean")
+ggplot(data = renamed_data, aes(x = genre, y = views)) +
+  geom_bar(stat = "summary", fun = "mean") +
+  labs(x = "Genre", y = "Views",
+       title = "Most Viewed Genre of Youtube's Genre")
+
 
 # Scatter Plot for Most Common between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
 ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
@@ -119,6 +130,8 @@ ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
 ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
   geom_line(stat = "summary",
             fun = "mean")
+
+
 
 
 # Research Checkpoint: 3 ####
@@ -135,7 +148,7 @@ View(VidOnlDat)
 str(VidOnlDat)
 VidOnlDat_nochr <- mutate(VidOnlDat, title = as.integer(as.factor(title)),
                           channel = as.integer(as.factor(channel)),
-                          category_id = as.integer(as.factor(category_id)))
+                          genre = as.integer(as.factor(genre)))
 VidOnlDat_nochr
 str(VidOnlDat_nochr)
 
