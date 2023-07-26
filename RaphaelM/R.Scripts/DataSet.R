@@ -1,7 +1,7 @@
 data <- readRDS("data/USvideos.RDS")
-data2 <- fromJSON(file="data/US_category_id.json")
+datacatgjson <- fromJSON(file="data/US_category_id.json")
 View(data) # trending_date = year/day/month
-View(data2)
+View(datacatgjson)
 
 # Libraries ####
 library(dplyr)
@@ -16,6 +16,9 @@ library(yardstick)
 library(reshape2)
 library(MLmetrics)
 library(Metrics)
+library(gganimate)
+library(geomtextpath)
+library(gghighlight)
 
 
 # Research Checkpoint 1: Cleaning the Data Set ####
@@ -82,12 +85,6 @@ new_data <- mutate(newvar_data, genre = case_when(
   genre == 44 ~ "Trailers"))
 View(new_data)
 
-# Second Version
-
-
-
-
-
 
 
 # Research Checkpoint 2: Analyze Variables of Data & Create Testable Research Question ####
@@ -115,24 +112,22 @@ View(new_data)
 ggplot()
 
 # Histogram Plot for Views (1 Numeric Variable)
-ggplot(data = renamed_data, aes(x = views)) +
+ggplot(new_data, aes(x = views)) +
   geom_histogram()
 
 # Research Question Plot?
-# Bar Plot between Views and Category ID (1 Categorical Variable & 1 Numeric Variable) 
-ggplot(data = renamed_data, aes(x = title, y = views)) +
+# Bar Plot between Views and title (1 Categorical Variable & 1 Numeric Variable) 
+ggplot(new_data, aes(x = title, y = views, fill = genre)) +
   geom_bar(stat = "summary",
-              fun = "mean")
-
+           fun = "mean")
 
 
 
 ## BEST BARPLOT ##
-ggplot(data = renamed_data, aes(x = genre, y = views)) +
+ggplot(renamed_data, aes(x = genre, y = views, fill = genre)) +
   geom_bar(stat = "summary", fun = "mean") +
   labs(x = "Genre", y = "Views",
        title = "Most Viewed Genre of Youtube's Genre")
-
 
 
 
@@ -179,7 +174,7 @@ ggplot(VidOnlDat_Cors, aes(x = Var1, y = Var2, fill = value)) +
   geom_tile() +
   scale_fill_gradient2(low = "darkblue", high = "white", mid = "darkgreen",
                        midpoint = 0)
-# High Correlation = Views to Likes
+# High Correlation = Views to Likes or Comments to Likes
 
 
 # Step 4 and 5:
@@ -197,19 +192,18 @@ VidOnlDat_test <- testing(VidOnlDat_split)
 VidOnlDat_lm_fit <- linear_reg() |>
   set_engine("lm") |>
   set_mode("regression") |>
-  fit(views ~ .,
+  fit(views ~ genre,
       data = VidOnlDat_train)
 
 VidOnlDat_lm_fit
 VidOnlDat_lm_fit$fit
 summary(VidOnlDat_lm_fit$fit)
 
-
 # Boosted Decision Trees
 VidOnlDat_boost_reg_fit <- boost_tree() |>
   set_engine("xgboost") |>
   set_mode("regression") |>
-  fit(views ~ ., data = VidOnlDat_train)
+  fit(views ~ genre, data = VidOnlDat_train)
 
 VidOnlDat_boost_reg_fit
 VidOnlDat_boost_reg_fit$fit
