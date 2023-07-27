@@ -130,7 +130,6 @@ ggplot(renamed_data, aes(x = genre, y = views, fill = genre)) +
        title = "Most Viewed Genre of Youtube's Genre")
 
 
-
 # Scatter Plot for Most Common between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
 ggplot(data = renamed_data, aes(x = likes, y = dislikes)) +
   geom_point()
@@ -160,6 +159,7 @@ VidOnlDat_nochr <- mutate(VidOnlDat, title = as.integer(as.factor(title)),
                           genre = as.integer(as.factor(genre)))
 VidOnlDat_nochr
 str(VidOnlDat_nochr)
+View(VidOnlDat_nochr)
 
 # Step 3:
 VidOnlDat_Cors <- VidOnlDat_nochr |>
@@ -176,7 +176,7 @@ ggplot(VidOnlDat_Cors, aes(x = Var1, y = Var2, fill = value)) +
                        midpoint = 0)
 # High Correlation = Views to Likes or Comments to Likes
 
-
+# Regression Data ####
 # Step 4 and 5:
 set.seed(72423)
 
@@ -233,18 +233,42 @@ yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
 
 
 
+# Classification Data (Nevermind, Doesn't Work) ####
+# Step 4 and 5:
+set.seed(72423)
+
+## Classification Data Sets splits
+View(VidOnlDat)
+str(VidOnlDat)
+
+VidOnlDat_onlFact <- mutate(VidOnlDat, title = as.factor(title),
+                          channel = as.factor(channel),
+                          genre = as.factor(genre))
+View(VidOnlDat_onlFact)
+str(VidOnlDat_onlFact)
 
 
+VidOnlDat_class_split <- initial_split(VidOnlDat_onlFact, prop = .75)
+VidOnlDat_class_train <- training(VidOnlDat_class_split)
+VidOnlDat_class_test <-  testing(VidOnlDat_class_split)
+
+# Step 6 and 7:
+# Logistic Model
+VidOnlDat_logreg_fit <- logistic_reg() |>
+  set_engine("glm") |>
+  set_mode("classification") |>
+  fit(genre ~ views, data = VidOnlDat_class_train)
+
+summary(VidOnlDat_logreg_fit$fit)
 
 
+# Step 8:
+## Logistic Regression
+VidOnlDat_Pred <- VidOnlDat_class_test
+VidOnlDat_Pred$logReg <- predict(VidOnlDat_logreg_fit, VidOnlDat_class_test)$.pred_class
 
-
-
-
-
-
-
-
+#f1 score
+F1_Score(VidOnlDat_Pred$genre, VidOnlDat_Pred$logReg)
 
 
 
