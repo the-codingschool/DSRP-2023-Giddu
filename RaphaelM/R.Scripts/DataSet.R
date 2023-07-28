@@ -93,17 +93,7 @@ View(new_data)
 # Numeric Variables: views, likes, dislikes, comment_count
 # Both: trending_date, category_id?, publish_time, 
 
-## Notes and Questions ##
-# What do the Numbers in the category_id Variable mean?
-  # No information about Category ID Numbers
-# How is the trending_date's are Organized?
-  # Is it from Year / Day / Month?
-# How is the publish_time Organized?
-  # What do the T represents?
-
-# Research Questions
-  # How do the Title of the Video and the Time it was Published influences the View Counts?
-  # How do the Title of the Videos influences the View Counts of it?
+# Research Questions ####
   # How does the Time it was Published of the Videos affect the View Counts of it?
   # How does the Category of the Videos affect the View Counts of it? (Probably the Best)
 
@@ -127,7 +117,7 @@ ggplot(new_data, aes(x = title, y = views, fill = genre)) +
 ggplot(renamed_data, aes(x = genre, y = views, fill = genre)) +
   geom_bar(stat = "summary", fun = "mean") +
   labs(x = "Genre", y = "Views",
-       title = "Most Viewed Genre of Youtube's Genre")
+       title = "Most Viewed Genre on Youtube")
 
 
 # Scatter Plot for Most Common between Likes and Dislikes (1 Numeric Variable vs 1 Numeric Variables)
@@ -214,8 +204,13 @@ VidOnlDat_boost_reg_fit$fit$evaluation_log
 # Step 8:
 VidOnlDat_reg_results <- VidOnlDat_test
 
+summary(VidOnlDat_reg_results)
+View(VidOnlDat_reg_results)
+
 #Linear Regression
 VidOnlDat_reg_results$lm_pred <- predict(VidOnlDat_lm_fit, VidOnlDat_test)$.pred
+
+table(VidOnlDat_reg_results$lm_pred)
 
 # Error for LR
 yardstick::mae(VidOnlDat_reg_results, views, lm_pred)
@@ -233,42 +228,13 @@ yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
 
 
 
-# Classification Data (Nevermind, Doesn't Work) ####
-# Step 4 and 5:
-set.seed(72423)
-
-## Classification Data Sets splits
-View(VidOnlDat)
-str(VidOnlDat)
-
-VidOnlDat_onlFact <- mutate(VidOnlDat, title = as.factor(title),
-                          channel = as.factor(channel),
-                          genre = as.factor(genre))
-View(VidOnlDat_onlFact)
-str(VidOnlDat_onlFact)
+# Hypothesis Testing ####
 
 
-VidOnlDat_class_split <- initial_split(VidOnlDat_onlFact, prop = .75)
-VidOnlDat_class_train <- training(VidOnlDat_class_split)
-VidOnlDat_class_test <-  testing(VidOnlDat_class_split)
-
-# Step 6 and 7:
-# Logistic Model
-VidOnlDat_logreg_fit <- logistic_reg() |>
-  set_engine("glm") |>
-  set_mode("classification") |>
-  fit(genre ~ views, data = VidOnlDat_class_train)
-
-summary(VidOnlDat_logreg_fit$fit)
 
 
-# Step 8:
-## Logistic Regression
-VidOnlDat_Pred <- VidOnlDat_class_test
-VidOnlDat_Pred$logReg <- predict(VidOnlDat_logreg_fit, VidOnlDat_class_test)$.pred_class
 
-#f1 score
-F1_Score(VidOnlDat_Pred$genre, VidOnlDat_Pred$logReg)
+
 
 
 
