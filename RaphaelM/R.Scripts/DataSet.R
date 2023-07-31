@@ -254,11 +254,12 @@ summary(VidOnlDat_aov)
 # Threshold is 0.05
 TukeyHSD(VidOnlDat_aov)
 
+
 ggplot(new_data, aes(x = views, y = genre)) +
   geom_count() +
   theme_minimal() +
-  labs(x = "Views", y = "Genre")
-
+  labs(x = "Views", y = "Genre", title = "Observations between Video's Genre and Views") +
+  scale_size_continuous(name = "Observations")
 
 
 
