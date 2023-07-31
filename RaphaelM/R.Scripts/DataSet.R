@@ -230,9 +230,34 @@ yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
 
 # Hypothesis Testing ####
 
+#Information ####
+# Research Question: How does the Category of the Videos affect the View Counts 
+# Null Hypothesis: The Genre has no effect the View Counts.
+# Alternative Hypothesis: The Genre has an affect to the View Counts.
+# Dependent Var = Views
+# Independent = Genre
 
+music <- filter(new_data, genre == "Music", views > 0)
+gaming <- filter(new_data, genre == "Gaming", views > 0)
+View(music)
+View(gaming)
 
+# T-Test ####
+t.test(music$views, gaming$views, paired = F, alternative = "less")
+# Not Significant because p-value is 1 > 0.5
 
+# Anova Testing ####
+## anova_results <- aov(Num.Var ~ Catg.Var, Data)
+VidOnlDat_aov <- aov(views ~ genre, new_data)
+
+summary(VidOnlDat_aov)
+# Threshold is 0.05
+TukeyHSD(VidOnlDat_aov)
+
+ggplot(new_data, aes(x = views, y = genre)) +
+  geom_count() +
+  theme_minimal() +
+  labs(x = "Views", y = "Genre")
 
 
 
