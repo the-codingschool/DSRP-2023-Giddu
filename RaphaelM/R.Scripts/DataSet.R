@@ -207,6 +207,7 @@ VidOnlDat_reg_results <- VidOnlDat_test
 summary(VidOnlDat_reg_results)
 View(VidOnlDat_reg_results)
 
+# Regression Results ####
 #Linear Regression
 VidOnlDat_reg_results$lm_pred <- predict(VidOnlDat_lm_fit, VidOnlDat_test)$.pred
 
@@ -232,10 +233,11 @@ yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
 
 #Information ####
 # Research Question: How does the Category of the Videos affect the View Counts 
-# Null Hypothesis: The Genre has no effect the View Counts.
-# Alternative Hypothesis: The Genre has an affect to the View Counts.
+# Null Hypothesis: The Genre has no effect the View Counts. (Ave Number of Views does not change in category)
+# Alternative Hypothesis: The Genre has an affect to the View Counts. (there is a change in the categories) (the Ave number of views does change in Categories)
 # Dependent Var = Views
 # Independent = Genre
+# Significant if lower than 0.05
 
 music <- filter(new_data, genre == "Music", views > 0)
 gaming <- filter(new_data, genre == "Gaming", views > 0)
@@ -253,6 +255,9 @@ VidOnlDat_aov <- aov(views ~ genre, new_data)
 summary(VidOnlDat_aov)
 # Threshold is 0.05
 TukeyHSD(VidOnlDat_aov)
+# NULL
+MusicHSD <- TukeyHSD(VidOnlDat_aov)$Music
+GamingHSD <- TukeyHSD(VidOnlDat_aov)$Gaming
 
 
 ggplot(new_data, aes(x = views, y = genre)) +
