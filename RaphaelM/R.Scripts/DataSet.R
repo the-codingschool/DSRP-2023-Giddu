@@ -111,6 +111,11 @@ ggplot(new_data, aes(x = title, y = views, fill = genre)) +
   geom_bar(stat = "summary",
            fun = "mean")
 
+ggplot(new_data, aes(x = title, y = views, fill = genre)) +
+  geom_bar(stat = "summary",
+           fun = "mean") +
+  labs(x = "Youtube Titles", y = "Views", title = "Youtube Videos Views Comparison") +
+  scale_size_continuous(name = "Genre")
 
 
 ## BEST BARPLOT ##
@@ -233,7 +238,7 @@ yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
 
 #Information ####
 # Research Question: How does the Category of the Videos affect the View Counts 
-# Null Hypothesis: The Genre has no effect the View Counts. (Ave Number of Views does not change in category)
+# Null Hypothesis: The Genre has no effect on the View Counts. (Ave Number of Views does not change in category)
 # Alternative Hypothesis: The Genre has an affect to the View Counts. (there is a change in the categories) (the Ave number of views does change in Categories)
 # Dependent Var = Views
 # Independent = Genre
@@ -255,9 +260,6 @@ VidOnlDat_aov <- aov(views ~ genre, new_data)
 summary(VidOnlDat_aov)
 # Threshold is 0.05
 TukeyHSD(VidOnlDat_aov)
-# NULL
-MusicHSD <- TukeyHSD(VidOnlDat_aov)$Music
-GamingHSD <- TukeyHSD(VidOnlDat_aov)$Gaming
 
 
 ggplot(new_data, aes(x = views, y = genre)) +
@@ -265,8 +267,6 @@ ggplot(new_data, aes(x = views, y = genre)) +
   theme_minimal() +
   labs(x = "Views", y = "Genre", title = "Observations between Video's Genre and Views") +
   scale_size_continuous(name = "Observations")
-
-
 
 
 
