@@ -39,7 +39,6 @@ newvar_data <- mutate(renamed_data,
        time_published_hrs = hour(publish_time))
 View(newvar_data)
 
-x
 
 # Videos ranked by Views
 VidView <- renamed_data |>
