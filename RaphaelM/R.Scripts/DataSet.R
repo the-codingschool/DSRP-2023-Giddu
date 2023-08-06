@@ -39,7 +39,7 @@ newvar_data <- mutate(renamed_data,
        time_published_hrs = hour(publish_time))
 View(newvar_data)
 
-
+x
 
 # Videos ranked by Views
 VidView <- renamed_data |>
@@ -48,7 +48,6 @@ VidView <- renamed_data |>
 View(VidView)
 
 # New Variables for Categorical_ID ####
-# First Version
 new_data <- mutate(newvar_data, genre = case_when(
   genre == 1 ~ "Film & Animation",
   genre == 2 ~ "Autos & Vehicles",
