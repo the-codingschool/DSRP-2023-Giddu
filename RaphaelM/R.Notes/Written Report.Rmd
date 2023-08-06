@@ -1,16 +1,257 @@
-# Title
+# Trending YouTube Video Statistic
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+**- Raphael Mendones**
 
-### Abstract
+## Background
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+One of the most famous website to be created, **YouTube**. Started in 2005, it had been producing numerous Videos continuously. Some of those Videos had become too popular that it became a ***"Top- Trending Video"***. This then brings us to the Main Topic of this Report, myself and a few others were tasked to analyze a Data Set and form a Research Question from it and then to answer it. The Data Set being ***"Trending YouTube Video Statistics"***, which is an analysis of the statistics stats of Trendy YouTube Videos that were published through the years.
 
-### Data Used
+### Research Question
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+The Research Question that I came up with was ***"Does the Categories from the Genre, affect the View Counts of the Video?"***. Originally, this wasn't my Question, I was planning on asking ***"What type if Genre has the Highest View Counts"*** but I thought that If I were to use that, it would seem too simple which is why I use the new one. I then choose **2 Variables** to which is **Genre** and the **Views**, from the Data Set so that I can use it on the Testing Model and get the result. With my Research Question created, I then started my **Approach**.
 
-```{r}
-# Click Knit to save Report as File
-# Abstract: Brief Summary (Search Abstract Example)
+### Approach
+
+Before I started my approach, I first decided to Clean my Data and Organize it , so that I can further understand it better. I also **created** plots to visualize what it would look like.
+
+```{r Library}
+# Libraries ####
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(janitor)
+library(rjson)
+library(lubridate)
+library(parsnip)
+library(rsample)
+library(yardstick)
+library(reshape2)
+library(MLmetrics)
+library(Metrics)
+library(gganimate)
+library(geomtextpath)
+library(gghighlight)
 ```
+
+```{r DataSetUp}
+data <- readRDS("data/USvideos.RDS")
+View(data)
+```
+
+```{r Cleaning}
+# Renaming Columns
+renamed_data <- rename(data,
+                   channel = channel_title,
+                   videos_removed = video_error_or_removed,
+                   genre = category_id,
+                   comments = comment_count)
+View(renamed_data)
+
+# Separate publish_time into 2 Column: Month_Publish and Time_Publish
+newvar_data <- mutate(renamed_data,
+       month_publish = month(publish_time),
+       time_published_hrs = hour(publish_time))
+View(newvar_data)
+
+# New Variables for Categorical_ID ####
+new_data <- mutate(newvar_data, genre = case_when(
+  genre == 1 ~ "Film & Animation",
+  genre == 2 ~ "Autos & Vehicles",
+  genre == 10 ~ "Music",
+  genre == 15 ~ "Pets & Animals",
+  genre == 16 ~ "name",
+  genre == 17 ~ "Sports",
+  genre == 18 ~ "Short Movies",
+  genre == 19 ~ "Travel & Events",
+  genre == 20 ~ "Gaming",
+  genre == 21 ~ "Videoblogging",
+  genre == 22 ~ "People & Blogs",
+  genre == 23 ~ "Comedy",
+  genre == 24 ~ "Entertainment",
+  genre == 25 ~ "News & Politics",
+  genre == 26 ~ "Howto & Style",
+  genre == 27 ~ "Education",
+  genre == 28 ~ "Science & Technology",
+  genre == 29 ~ "Nonprofits & Activism",
+  genre == 30 ~ "Movies",
+  genre == 31 ~ "Anime/Animation",
+  genre == 32 ~ "Action/Adventure",
+  genre == 33 ~ "Classics",
+  genre == 34 ~ "Comedy",
+  genre == 35 ~ "Documentary",
+  genre == 36 ~ "Drama",
+  genre == 37 ~ "Family",
+  genre == 38 ~ "Foreign",
+  genre == 39 ~ "Horror",
+  genre == 40 ~ "Sci-Fi/Fantasy",
+  genre == 41 ~ "Thriller",
+  genre == 42 ~ "Shorts",
+  genre == 43 ~ "Shows",
+  genre == 44 ~ "Trailers"))
+View(new_data)
+```
+
+```{r Plots}
+# Research Question Plot
+ggplot(renamed_data, aes(x = genre, y = views, fill = genre)) +
+  geom_bar(stat = "summary", fun = "mean") +
+  labs(x = "Genre", y = "Views",
+       title = "Most Viewed Genre on Youtube")
+
+ggplot(new_data, aes(x = title, y = views, fill = genre)) +
+  geom_bar(stat = "summary",
+           fun = "mean") +
+  labs(x = "Youtube Titles", y = "Views", title = "Youtube Videos Views Comparison") +
+  scale_size_continuous(name = "Genre")
+```
+
+After I was done cleaning and organizing my Data, I then proceeded into using a **Statistical Analysis** **Model** to get a Result. I first begun with a **Machine Learning Model** to answer my Question. I also created a Plot to find out which Variable has the Highest Correlation and the **Lowest Correlation**.
+
+#### Machine Learning Model
+
+```{r Step12}
+# Step 1 and 2:
+VidOnlDat <- select(new_data, -c(video_id, trending_date, publish_time, tags, thumbnail_link:time_published_hrs))
+View(VidOnlDat)
+
+str(VidOnlDat)
+VidOnlDat_nochr <- mutate(VidOnlDat, title = as.integer(as.factor(title)),
+                          channel = as.integer(as.factor(channel)),
+                          genre = as.integer(as.factor(genre)))
+VidOnlDat_nochr
+str(VidOnlDat_nochr)
+View(VidOnlDat_nochr)
+```
+
+```{r Step3}
+# Step 3:
+VidOnlDat_Cors <- VidOnlDat_nochr |>
+  cor() |>
+  melt() |>
+  as.data.frame()
+
+VidOnlDat_Cors
+View(VidOnlDat_Cors)
+
+ggplot(VidOnlDat_Cors, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "darkblue", high = "white", mid = "darkgreen",
+                       midpoint = 0)
+```
+
+```{r Step45}
+# Step 4 and 5:
+set.seed(72423)
+
+# Regression Data Split
+VidOnlDat_split <- initial_split(VidOnlDat_nochr, prop = .75) # Use 75% of data for Training
+VidOnlDat_train <- training(VidOnlDat_split)
+VidOnlDat_test <- testing(VidOnlDat_split)
+```
+
+```{r Step67}
+# Step 6 and 7:
+
+#Linear Model
+VidOnlDat_lm_fit <- linear_reg() |>
+  set_engine("lm") |>
+  set_mode("regression") |>
+  fit(views ~ genre,
+      data = VidOnlDat_train)
+
+VidOnlDat_lm_fit
+VidOnlDat_lm_fit$fit
+summary(VidOnlDat_lm_fit$fit)
+
+# Boosted Decision Trees
+VidOnlDat_boost_reg_fit <- boost_tree() |>
+  set_engine("xgboost") |>
+  set_mode("regression") |>
+  fit(views ~ genre, data = VidOnlDat_train)
+
+VidOnlDat_boost_reg_fit
+VidOnlDat_boost_reg_fit$fit
+summary(VidOnlDat_boost_reg_fit$fit)
+VidOnlDat_boost_reg_fit$fit$evaluation_log
+```
+
+```{r Step8}
+# Step 8:
+VidOnlDat_reg_results <- VidOnlDat_test
+
+summary(VidOnlDat_reg_results)
+View(VidOnlDat_reg_results)
+```
+
+```{r Results}
+#Linear Regression
+VidOnlDat_reg_results$lm_pred <- predict(VidOnlDat_lm_fit, VidOnlDat_test)$.pred
+
+table(VidOnlDat_reg_results$lm_pred)
+
+# Error for LR
+yardstick::mae(VidOnlDat_reg_results, views, lm_pred)
+yardstick::rmse(VidOnlDat_reg_results, views, lm_pred)
+
+
+# Boosted Tree Regression
+VidOnlDat_reg_results$boost_pred <- predict(VidOnlDat_boost_reg_fit, VidOnlDat_test)$.pred
+
+# Error for BT
+yardstick::mae(VidOnlDat_reg_results, views, boost_pred)
+yardstick::rmse(VidOnlDat_reg_results, views, boost_pred)
+```
+
+#### Regression Conclusion
+
+After getting the Results, I had found out that because it gives me a **Big Error Value**. This means that this **Regression Type Model** or a **Supervised Learning Model**, isn't the right Model to answer my Question. Which made me switch to a **Hypothesis Testing Model**.
+
+#### **Hypothesis Testing Model**
+
+When I begun my Hypothesis Testing, I used the the **Anova Results** to get the results. In order to get the results, I first have to create a **Null** and **Alternative Hypothesis** which is basically an answer to my Research Question. Then find out if the **P-Value** of the **Tested Group of Values** are **Significant** or not.
+
+[**Null Question -**]{.underline} The Genre from its category has made no change in the Average Number of View Counts of their Video
+
+[**Alternative Question -**]{.underline} The Genre from its category does have a change in the Average Number of View Counts of their Video
+
+[**Significant -**]{.underline} P-Value is lower than 0.05. This means that the Alternative Hypothesis is True.
+
+[**Not Significant -**]{.underline} P-Value is higher than 0.05. This means that the Null Hypothesis is True.
+
+After creating my Hypothesis. I then begun getting my Results.
+
+```{r TestingResults}
+# Anova Testing ####
+VidOnlDat_aov <- aov(views ~ genre, new_data)
+
+summary(VidOnlDat_aov)
+TukeyHSD(VidOnlDat_aov)
+```
+
+```{r ResultPlot}
+ggplot(new_data, aes(x = views, y = genre)) +
+  geom_count() +
+  theme_minimal() +
+  labs(x = "Views", y = "Genre", title = "Observations between Video's Genre and Views") +
+  scale_size_continuous(name = "Observations")
+```
+
+#### ANOVA-Testing Conclusion
+
+After getting the Results, it can be seen that the **P-Value** or the **Pr(\>F)** of the Groups of Values is lower than **0.05** by how there are **3 Stars** next to it. This means that the P-Value is Significant, meaning that the **Alternative Hypothesis** that says that the Categories of the Genre having an effect on the View Counts **is True**.
+
+#### Conclusion / Discussion
+
+With all the information from the Results, I can now conclude that the Categories from the Genre, **Does** have an affect towards the View Counts from the Videos.
+
+#### Inportance
+
+This information can be of importance by how it give you a general idea on what types of Video Genre, really attracts the most Viewers. This means that you can upload a Video with any type of Genre you want it to be, and expect the average number of Views it can get.
+
+#### Project Information
+
+[**Project Name -**]{.underline} DSRP-2023-Giddu
+
+[**Link to Git Repo -**]{.underline} <https://github.com/the-codingschool/DSRP-2023-Giddu>
+
+[**Data Folder Items -**]{.underline} USvideos.RDS, US_category_id.json, links
